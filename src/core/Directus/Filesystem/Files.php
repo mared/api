@@ -476,11 +476,21 @@ class Files
 
         if ($typeTokens[0] == 'image') {
             $meta = [];
-            // @TODO: use this as fallback for finfo?
-            $imageInfo = getimagesizefromstring($data, $meta);
+            
+            if ($mime == 'image/svg' or $mime == 'image/svg+xml') {
+                if (preg_match('/<svg[^>]+?width="(\d+)"/i', $data, $width_match) and
+                    preg_match('/<svg[^>]+?height="(\d+)"/i', $data, $height_match)) {
 
-            $info['width'] = $imageInfo[0];
-            $info['height'] = $imageInfo[1];
+                    $info['width']  = $width_match[1];
+                    $info['height'] = $height_match[1];
+                }
+            } else {
+                // @TODO: use this as fallback for finfo?
+                $imageInfo = getimagesizefromstring($data, $meta);
+
+                $info['width'] = $imageInfo[0];
+                $info['height'] = $imageInfo[1];
+            }
 
             if (isset($meta['APP13'])) {
                 $iptc = iptcparse($meta['APP13']);
